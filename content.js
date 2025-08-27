@@ -177,7 +177,7 @@ const styles = `
     fill: currentColor;
     color: var(--text);
     flex: 0 0 auto;
-    margin-top: 2px; /* Align icon with first line of text */
+    margin-top: 2px;
   }
 
   .item span {
@@ -243,7 +243,7 @@ function debounce(fn, ms) {
 }
 
 const Icons = {
-  promptItem: `<svg viewBox="0 0 24 24"><path d="M4 6h10v2H4V6zm0 5h16v2H4v-2zm0 5h10v2H4v-2z"/></svg>`,
+  promptItem: `<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>`,
   collapse: `<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>`,
   search: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
   reload: `<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`
@@ -401,7 +401,7 @@ function buildSidebar() {
     <div class="resize-handle"></div>
     <div class="toolbar">
       <button class="icon-btn" id="collapseBtn" title="Hide">${Icons.collapse}</button>
-      <button class="icon-btn" id="tocBtn" title=" Rescan">${Icons.reload}</button>
+      <button class="icon-btn" id="tocBtn" title="Rescan">${Icons.reload}</button>
     </div>
     <div class="search-wrap">
       <div class="search-rel">
@@ -432,7 +432,6 @@ function buildSidebar() {
 
   // --- Resizing Logic ---
   const handle = shadowRoot.querySelector(".resize-handle");
-  let isResizing = false;
   let rafId = 0;
 
   const onMove = (ev) => {
@@ -447,7 +446,6 @@ function buildSidebar() {
   };
 
   const onUp = () => {
-    isResizing = false;
     document.body.classList.remove("resizing");
     document.removeEventListener("mousemove", onMove, true);
     document.removeEventListener("mouseup", onUp, true);
@@ -456,7 +454,6 @@ function buildSidebar() {
   };
 
   const onDown = (e) => {
-    isResizing = true;
     document.body.classList.add("resizing");
     document.addEventListener("mousemove", onMove, true);
     document.addEventListener("mouseup", onUp, true);
@@ -464,7 +461,6 @@ function buildSidebar() {
   };
   
   const onTouchStart = (e) => {
-    isResizing = true;
     document.body.classList.add("resizing");
     document.addEventListener("touchmove", onMove, { passive: false, capture: true });
     document.addEventListener("touchend", onUp, { capture: true });
@@ -497,7 +493,7 @@ new MutationObserver(ensureSidebarAndScan).observe(document.body, {
   subtree: true
 });
 
-// Listen for the toggle command from the popup.
+// Listen for the toggle command from the background script.
 if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((req) => {
     if (req.action === "toggle_sidebar") {
