@@ -1,0 +1,72 @@
+/* styles.css */
+
+/* Main Sidebar Container */
+#chat-toc-sidebar {
+  /* --- CHANGES --- */
+  display: flex !important; /* Force display property */
+  flex-direction: column !important;
+  position: fixed !important; /* Stays in place when you scroll */
+  top: 0 !important;
+  right: 0 !important;
+  width: 280px !important;
+  height: 100vh !important; /* Full viewport height */
+  background-color: #f8f9fa !important;
+  border-left: 1px solid #dee2e6 !important;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1) !important;
+  /* Set the highest possible z-index to ensure it's on top of everything */
+  z-index: 2147483647 !important; 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  transition: transform 0.3s ease-in-out !important;
+  transform: translateX(0); /* Ensure it starts on-screen */
+}
+
+/* Collapsed state for the sidebar */
+#chat-toc-sidebar.collapsed {
+  /* Move the sidebar off-screen to the right */
+  transform: translateX(100%) !important;
+}
+
+/* Header section with the title and button */
+#chat-toc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #e9ecef;
+  border-bottom: 1px solid #dee2e6;
+}
+
+#chat-toc-header h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* Toggle Button Styling */
+#chat-toc-toggle-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+#chat-toc-toggle-btn:hover {
+  background-color: #5a6268;
+}
+
+/* List container for the prompts in Prompt Navigator */
+#chat-toc-list {
+  padding: 15px;
+  overflow-y: auto; /* Adds a scrollbar if the list gets too long */
+  flex-grow: 1;
+}
+
+#chat-toc-list p {
+  color: #6c757d;
+  font-size: 14px;
+}
