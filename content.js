@@ -3,8 +3,35 @@
 
 console.log("Prompt Navigator for AI Chats — Cleaned & Refactored");
 
+// --- SITE-SPECIFIC CONFIGURATION ---
+const SITE_CONFIGS = {
+  "chat.openai.com": {
+    promptSelector: "div[data-message-author-role='user']",
+    extractText: (node) => {
+        const textContainer = node.querySelector('div.whitespace-pre-wrap');
+        return textContainer ? textContainer.textContent.trim() : '';
+    }
+  },
+  "chatgpt.com": {
+    promptSelector: "div[data-message-author-role='user']",
+    extractText: (node) => {
+        const textContainer = node.querySelector('div.whitespace-pre-wrap');
+        return textContainer ? textContainer.textContent.trim() : '';
+    }
+  },
+  "gemini.google.com": {
+    promptSelector: ".query-text",
+    extractText: (node) => node.textContent.trim()
+  }
+};
+
+function getCurrentSiteConfig() {
+  const hostname = window.location.hostname;
+  return SITE_CONFIGS[hostname];
+}
+
+
 // --- CONFIGURATION ---
-const PROMPT_SELECTOR = ".query-text"; // The CSS selector for the main prompt container
 const MIN_WIDTH = 260; // Minimum width for the resizable sidebar
 const MAX_WIDTH = 560; // Maximum width for the resizable sidebar
 const START_WIDTH = 320; // The sidebar's initial width
@@ -13,6 +40,9 @@ const SCAN_DEBOUNCE_MS = 150; // A small delay to prevent the scanner from runni
 // --- STYLES ---
 // All CSS for the sidebar is encapsulated here. It supports both light and dark modes.
 const styles = `
+  /* Import the Inter font from Google Fonts */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
   :host {
     --transition-fast: 140ms;
     --accent: #1a73e8;
@@ -45,12 +75,14 @@ const styles = `
     color: var(--text);
     border-left: 1px solid var(--border);
     box-shadow: var(--shadow);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* Set the font for the entire container */
+    font-family: 'Inter', sans-serif;
     contain: content;
   }
 
   .toolbar {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     gap: 6px;
     padding: 8px;
@@ -97,12 +129,14 @@ const styles = `
   }
 
   .search-wrap {
-    padding: 6px 8px;
+    padding: 8px; /* Consistent padding */
     border-bottom: 1px solid var(--border);
   }
 
   .search-rel {
     position: relative;
+    display: flex; /* Use flexbox for alignment */
+    align-items: center;
   }
 
   .search-icon {
@@ -116,27 +150,32 @@ const styles = `
   }
 
   .search-icon svg {
-    width: 14px;
-    height: 14px;
+    /* Adjusted icon size */
+    width: 15px;
+    height: 15px;
     fill: currentColor;
     color: var(--text);
   }
 
   .search-input {
     width: 100%;
-    height: 28px;
-    padding: 0 8px 0 26px;
-    font-size: 13px;
+    height: 32px;
+    padding: 0 12px 0 32px;
+    font-size: 14px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     outline: none;
     background: var(--bg);
     color: var(--text);
-    transition: border var(--transition-fast);
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    /* Explicitly set the font for the input */
+    font-family: 'Inter', sans-serif;
   }
 
   .search-input:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
   }
 
   .sidebar-list {
@@ -153,18 +192,22 @@ const styles = `
 
   .item {
     display: flex;
-    align-items: flex-start;
+    /* This is the fix: Vertically centers the icon with the text */
+    align-items: center;
     gap: 8px;
     width: 100%;
     padding: 8px 10px;
     background: transparent;
     border: none;
     text-align: left;
+    /* Adjusted font size */
     font-size: 13px;
     color: var(--text);
     cursor: pointer;
     overflow: hidden;
     transition: background var(--transition-fast);
+     /* Explicitly set the font for list items */
+    font-family: 'Inter', sans-serif;
   }
 
   .item:hover {
@@ -172,12 +215,12 @@ const styles = `
   }
 
   .item svg {
-    width: 14px;
-    height: 14px;
+    /* Adjusted icon size */
+    width: 15px;
+    height: 15px;
     fill: currentColor;
     color: var(--text);
     flex: 0 0 auto;
-    margin-top: 2px;
   }
 
   .item span {
@@ -232,6 +275,7 @@ const styles = `
 let shadowRoot = null;
 let hostEl = null;
 let widthPx = START_WIDTH;
+const siteConfig = getCurrentSiteConfig(); // Get the config for the current site
 
 // --- UTILITY FUNCTIONS ---
 function debounce(fn, ms) {
@@ -244,9 +288,9 @@ function debounce(fn, ms) {
 
 const Icons = {
   promptItem: `<svg viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>`,
-  collapse: `<svg viewBox="0 0 24 24"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>`,
+  close: `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`,
   search: `<svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>`,
-  reload: `<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`
+  sync: `<svg viewBox="0 0 24 24"><path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/></svg>`
 };
 
 // --- CORE FUNCTIONS ---
@@ -256,20 +300,19 @@ const Icons = {
  * and renders them to the sidebar list.
  */
 function scanForPrompts() {
-  if (!shadowRoot) return;
+  if (!shadowRoot || !siteConfig) return;
   const listEl = shadowRoot.querySelector(".sidebar-list");
   const searchInput = shadowRoot.querySelector(".search-input");
   if (!listEl || !searchInput) return;
 
   const searchVal = (searchInput.value || "").toLowerCase();
-  const promptNodes = document.querySelectorAll(PROMPT_SELECTOR);
+  const promptNodes = document.querySelectorAll(siteConfig.promptSelector);
   
   const fragment = document.createDocumentFragment();
   let itemsFound = 0;
 
   promptNodes.forEach((node) => {
-    const paragraphs = node.querySelectorAll('p');
-    const text = Array.from(paragraphs).map(p => p.textContent).join(' ').trim();
+    const text = siteConfig.extractText(node);
     
     if (!text || (searchVal && !text.toLowerCase().includes(searchVal))) {
       return;
@@ -301,7 +344,7 @@ function scanForPrompts() {
   } else {
     const emptyMsg = document.createElement("div");
     emptyMsg.className = "empty";
-    emptyMsg.textContent = searchVal ? "No results found" : "No prompts found";
+    emptyMsg.textContent = searchVal ? "No results found" : "No prompts found on this page.";
     listEl.appendChild(emptyMsg);
   }
 }
@@ -319,7 +362,8 @@ function toggleSidebar() {
  * Finds the correct scrollable container for the chat history.
  */
 function findScrollableContainer() {
-    let current = document.querySelector(PROMPT_SELECTOR);
+    if (!siteConfig) return document.documentElement;
+    let current = document.querySelector(siteConfig.promptSelector);
     if (!current) return document.documentElement;
 
     while (current && current !== document.body) {
@@ -387,7 +431,7 @@ function buildSidebar() {
     width: `${widthPx}px`,
     zIndex: "2147483647",
     transform: "translateZ(0) translateX(0%)",
-    transition: "transform var(--transition-fast) ease-out"
+    transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)"
   });
 
   shadowRoot = hostEl.attachShadow({ mode: "open" });
@@ -400,8 +444,8 @@ function buildSidebar() {
   container.innerHTML = `
     <div class="resize-handle"></div>
     <div class="toolbar">
-      <button class="icon-btn" id="collapseBtn" title="Hide">${Icons.collapse}</button>
-      <button class="icon-btn" id="tocBtn" title="Rescan">${Icons.reload}</button>
+      <button class="icon-btn" id="tocBtn" title="Deep Scan">${Icons.sync}</button>
+      <button class="icon-btn" id="closeBtn" title="Hide">${Icons.close}</button>
     </div>
     <div class="search-wrap">
       <div class="search-rel">
@@ -418,7 +462,7 @@ function buildSidebar() {
 
   // --- Event Listeners ---
   const debouncedScan = debounce(scanForPrompts, SCAN_DEBOUNCE_MS);
-  shadowRoot.getElementById("collapseBtn").addEventListener("click", toggleSidebar);
+  shadowRoot.getElementById("closeBtn").addEventListener("click", toggleSidebar);
   shadowRoot.getElementById("tocBtn").addEventListener("click", deepScan);
   
   const searchInput = shadowRoot.querySelector(".search-input");
@@ -478,6 +522,11 @@ function buildSidebar() {
  * Ensures the sidebar exists and then runs a scan for prompts.
  */
 function ensureSidebarAndScan() {
+  if (!siteConfig) {
+      console.log("Prompt Navigator: This site is not supported.");
+      return;
+  }
+  
   if (!document.getElementById("chat-toc-host")) {
     buildSidebar();
   }
@@ -488,7 +537,10 @@ function ensureSidebarAndScan() {
 ensureSidebarAndScan();
 
 // Watch for page changes and re-run the initialization.
-new MutationObserver(ensureSidebarAndScan).observe(document.body, {
+// We target 'main' as it's a common container for the chat content on supported sites,
+// falling back to the body if it's not found. This is more performant.
+const targetNode = document.querySelector('main') || document.body;
+new MutationObserver(ensureSidebarAndScan).observe(targetNode, {
   childList: true,
   subtree: true
 });
@@ -497,6 +549,7 @@ new MutationObserver(ensureSidebarAndScan).observe(document.body, {
 if (typeof chrome !== "undefined" && chrome.runtime?.onMessage) {
   chrome.runtime.onMessage.addListener((req) => {
     if (req.action === "toggle_sidebar") {
+      if (!siteConfig) return true; // Don't try to build if the site isn't supported
       if (!document.getElementById("chat-toc-host")) {
         buildSidebar();
       }

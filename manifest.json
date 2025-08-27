@@ -2,16 +2,14 @@
   "manifest_version": 3,
   "name": "Prompt Navigator: Search & Jump in AI Chats",
   "version": "1.0.0",
-  "description": "The essential navigator for your AI chats. Instantly find, search, and jump to any prompt in your conversation history on ChatGPT, Gemini, Claude, and Perplexity. Stop the endless scrolling and supercharge your productivity with a powerful, searchable outline of your entire chat.",
+  "description": "The essential navigator for your AI chats. Instantly find, search, and jump to any prompt in your conversation history on ChatGPT and Gemini.",
   "permissions": [
-    "activeTab",
     "scripting"
   ],
   "host_permissions": [
     "https://gemini.google.com/*",
     "https://chat.openai.com/*",
-    "https://claude.ai/*",
-    "https://www.perplexity.ai/*"
+    "https://chatgpt.com/*"
   ],
   "action": {
     "default_icon": {
@@ -33,10 +31,11 @@
       "matches": [
         "https://gemini.google.com/*",
         "https://chat.openai.com/*",
-        "https://claude.ai/*",
-        "https://www.perplexity.ai/*"
+        "https://chatgpt.com/*"
       ],
-      "js": ["content.js"]
+      "js": [
+        "content.js"
+      ]
     }
   ]
 }
