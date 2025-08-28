@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Prompt Navigator: Search & Jump in AI Chats",
   "version": "1.0.0",
-  "description": "Instantly find, search, and jump to any prompt in your ChatGPT and Gemini conversation history. Stop endless scrolling.",
+  "description": "The essential navigator for your AI chats. Instantly find, search, and jump to any prompt in your conversation history on ChatGPT and Gemini.",
   "permissions": [
     "scripting"
   ],
