@@ -1,5 +1,7 @@
 <div align="center">
-  <img width="128" height="128" alt="search" src="https://github.com/user-attachments/assets/aa23309a-627c-49b0-b4dd-8fcac4687033" />
+  <!--<img width="128" height="128" alt="search" src="https://github.com/user-attachments/assets/aa23309a-627c-49b0-b4dd-8fcac4687033" />-->
+  <img width="128" height="128" alt="image" src="https://github.com/user-attachments/assets/fa030e56-a789-4113-9bbf-16c5f75a3db3" />
+
   <h1>Prompt Navigator for AI Chats</h1>
   <p><strong>🚀 Instantly navigate, search, and organize your AI conversations like a pro.</strong></p>
   <p>
