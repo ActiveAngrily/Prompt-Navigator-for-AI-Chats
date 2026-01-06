@@ -1,11 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Prompt Navigator: Search & Jump in AI Chats",
-  "version": "1.0.0",
-  "description": "The essential navigator for your AI chats. Instantly find, search, and jump to any prompt in your conversation history on ChatGPT and Gemini.",
-  "permissions": [
-    "scripting"
-  ],
+  "name": "Prompt Navigator: Search & Jump",
+  "version": "1.1.1",
+  "description": "Instantly find, search, and jump to any prompt in your AI conversation history.",
+  "permissions": ["scripting"],
   "host_permissions": [
     "https://gemini.google.com/*",
     "https://chat.openai.com/*",
@@ -13,19 +11,20 @@
   ],
   "action": {
     "default_icon": {
-      "16": "images/icon16.png",
-      "48": "images/icon48.png",
-      "128": "images/icon128.png"
+      "16": "images/iconlight16.png",
+      "48": "images/iconlight48.png",
+      "128": "images/iconlight128.png"
     }
   },
   "background": {
     "service_worker": "background.js"
   },
-  "icons": {
-    "16": "images/icon16.png",
-    "48": "images/icon48.png",
-    "128": "images/icon128.png"
-  },
+  "web_accessible_resources": [
+    {
+      "resources": ["images/*.png"],
+      "matches": ["*://gemini.google.com/*", "*://chatgpt.com/*", "*://chat.openai.com/*"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -33,9 +32,7 @@
         "https://chat.openai.com/*",
         "https://chatgpt.com/*"
       ],
-      "js": [
-        "content.js"
-      ]
+      "js": ["content.js"]
     }
   ]
 }
