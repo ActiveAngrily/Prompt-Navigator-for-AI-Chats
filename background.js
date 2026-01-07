@@ -1,13 +1,27 @@
 // background.js
 
+// Listens for the extension icon click to toggle the sidebar
 chrome.action.onClicked.addListener((tab) => {
   if (tab.id) {
     chrome.tabs.sendMessage(tab.id, { action: "toggle_sidebar" }, (response) => {
       if (chrome.runtime.lastError) {
-        // This error is expected if the content script isn't on the current page.
-        // We can safely ignore it, but we'll log it for debugging purposes.
-        console.log(`Prompt Navigator: Could not establish connection with tab ${tab.id}. This is expected on pages where the content script is not injected.`);
+        console.log("Prompt Navigator: Tab connection error (expected on unsupported pages).");
       }
+    });
+  }
+});
+
+// Listens for theme change messages from content.js to update the toolbar icon
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "update_icon") {
+    const theme = request.theme === "dark" ? "dark" : "light";
+    chrome.action.setIcon({
+      path: {
+        "16": `images/icon${theme}16.png`,
+        "48": `images/icon${theme}48.png`,
+        "128": `images/icon${theme}128.png`
+      },
+      tabId: sender.tab.id
     });
   }
 });
